@@ -18,18 +18,23 @@ def tail_task(path, modify_event, loop, new=False):
             # Seek to end of file
             os.lseek(f, 0, os.SEEK_END)
 
+        guard_truncate = False
         line_buffer = bytearray()
         while True:
             try:
                 block = os.read(f, 4096)
+                if block == b'' and guard_truncate:
+                    # Reset so os.read will return data again
+                    logger.debug("Truncation detected for {}, resetting".format(path))
+                    os.lseek(f, 0, os.SEEK_DATA)
+                    block = os.read(f, 4096)
+                guard_truncate = False
             except BlockingIOError:
                 logger.debug("No more to read (BlockingIOError) for {}, waiting for modify event".format(path))
                 yield from modify_event.wait()
                 modify_event.clear()
             else:
                 if block == b'':
-                    # Reset so os.read will return data again
-                    os.lseek(f, 0, os.SEEK_DATA)
                     # Write any remaining bytes when EOF is encountered
                     if line_buffer:
                         sys.stdout.write(line_buffer)
@@ -37,6 +42,7 @@ def tail_task(path, modify_event, loop, new=False):
                     logger.debug("No more to read for {}, waiting for modify event".format(path))
                     yield from modify_event.wait()
                     modify_event.clear()
+                    guard_truncate = True
                 else:
                     line_buffer.extend(block)
                     while True:
