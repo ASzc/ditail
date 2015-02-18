@@ -8,7 +8,7 @@ import sys
 
 import pyinotify
 
-logger = logging.getLogger("dtail")
+logger = logging.getLogger("ditail")
 
 @asyncio.coroutine
 def tail_task(path, modify_event, loop, new=False):
