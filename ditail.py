@@ -16,9 +16,8 @@ def tail_task(path, modify_event, loop, new=False):
     try:
         if not new:
             # Seek to end of file
-            os.lseek(f, -8, os.SEEK_END)
+            os.lseek(f, 0, os.SEEK_END)
 
-        previous_line_len = 0
         line_buffer = bytearray()
         while True:
             try:
@@ -29,8 +28,8 @@ def tail_task(path, modify_event, loop, new=False):
                 modify_event.clear()
             else:
                 if block == b'':
-                    # Seek to the end of previous line
-                    os.lseek(f, -previous_line_len, os.SEEK_CUR)
+                    # Reset so os.read will return data again
+                    os.lseek(f, 0, os.SEEK_DATA)
                     # Write any remaining bytes when EOF is encountered
                     if line_buffer:
                         sys.stdout.write(line_buffer)
@@ -46,7 +45,6 @@ def tail_task(path, modify_event, loop, new=False):
                             break
                         else:
                             # Write out through newline, remove that portion from buffer
-                            previous_line_len = n+1
                             sys.stdout.write(line_buffer[:(n+1)])
                             line_buffer = line_buffer[(n+1):]
     finally:
