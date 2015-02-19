@@ -41,7 +41,7 @@ setup(
     ],
     keywords="tail directory recursive inotify",
 
-    packages=["ditail"],
+    py_modules=["ditail"],
     scripts=["scripts/ditail"],
 
     install_requires=install_requires,
