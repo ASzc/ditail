@@ -127,7 +127,7 @@ def tail_files_in(directory):
 #
 
 def create_argparser():
-    parser = argparse.ArgumentParser(description="Prints any new lines added to all files in a directory tree, inotify is used for new/deleted file awareness.")
+    parser = argparse.ArgumentParser(description="Prints new lines added to all files in a directory and its subdirectories. Any files added after startup will also be monitored.")
     parser.add_argument("-d", "--debug", action="store_true", help="Enable logging (at DEBUG level)")
     parser.add_argument("directory", help="The directory to look in for files to tail")
     return parser
