@@ -21,38 +21,29 @@ def tail_task(path, modify_event, loop, new=False):
         guard_truncate = False
         line_buffer = bytearray()
         while True:
-            try:
+            block = os.read(f, 4096)
+            if block == b'' and guard_truncate:
+                # Reset so os.read will return data again
+                logger.debug("Truncation detected for {}, resetting".format(path))
+                os.lseek(f, 0, os.SEEK_DATA)
                 block = os.read(f, 4096)
-                if block == b'' and guard_truncate:
-                    # Reset so os.read will return data again
-                    logger.debug("Truncation detected for {}, resetting".format(path))
-                    os.lseek(f, 0, os.SEEK_DATA)
-                    block = os.read(f, 4096)
-                guard_truncate = False
-            except BlockingIOError:
-                logger.debug("No more to read (BlockingIOError) for {}, waiting for modify event".format(path))
+            guard_truncate = False
+
+            if block == b'':
+                logger.debug("No more to read for {}, waiting for modify event".format(path))
                 yield from modify_event.wait()
                 modify_event.clear()
+                guard_truncate = True
             else:
-                if block == b'':
-                    # Write any remaining bytes when EOF is encountered
-                    if line_buffer:
-                        sys.stdout.write(line_buffer)
-                        line_buffer = bytearray()
-                    logger.debug("No more to read for {}, waiting for modify event".format(path))
-                    yield from modify_event.wait()
-                    modify_event.clear()
-                    guard_truncate = True
-                else:
-                    line_buffer.extend(block)
-                    while True:
-                        n = line_buffer.find(b"\n")
-                        if n == -1:
-                            break
-                        else:
-                            # Write out through newline, remove that portion from buffer
-                            sys.stdout.write(line_buffer[:(n+1)])
-                            line_buffer = line_buffer[(n+1):]
+                line_buffer.extend(block)
+                while True:
+                    n = line_buffer.find(b"\n")
+                    if n == -1:
+                        break
+                    else:
+                        # Write out through newline, remove that portion from buffer
+                        sys.stdout.write(line_buffer[:(n+1)])
+                        line_buffer = line_buffer[(n+1):]
     finally:
         os.close(f)
 
@@ -118,11 +109,16 @@ def tail_files_in(directory):
         loop.run_forever()
         logger.debug("Loop stopped")
     except KeyboardInterrupt:
-        loop.stop()
-        logger.debug("Keyboard Interrupt, loop stopped")
+        logger.debug("Keyboard Interrupt, closing loop")
     finally:
-        for task in tail_tasks.values():
+        tasks = asyncio.Task.all_tasks()
+        for task in tasks:
             task.cancel()
+        try:
+            loop.run_until_complete(asyncio.gather(*tasks, loop=loop))
+        except asyncio.CancelledError:
+            pass
+        loop.close()
 
 #
 # Main
