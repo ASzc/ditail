@@ -1,0 +1,18 @@
+# Maintainer: Alex Szczuczko <alex@szc.ca>
+
+pkgname=python-ditail
+pkgver=0.1.0
+pkgrel=1
+pkgdesc="Tail for directories"
+arch=("any")
+url="https://github.com/ASzc/ditail"
+license=("GPL")
+depends=("python-pyinotify")
+options=(!emptydirs)
+source=("$url/archive/${pkgver}.tar.gz")
+sha256sums=("TODO")
+
+package() {
+    cd "$srcdir/$pkgname-$pkgver"
+    python setup.py install --root="$pkgdir/" --optimize=1
+}
