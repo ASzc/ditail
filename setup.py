@@ -23,6 +23,7 @@ setup(
     description="Tail for directories",
     long_description=long_description,
     url=url,
+    download_url="{url}/archive/{version}.tar.gz".format(**locals()),
 
     author="Alex Szczuczko",
     author_email="alex@szc.ca",
