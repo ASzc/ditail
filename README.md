@@ -35,7 +35,7 @@ Ensure `$HOME/.local/bin` is in your shell's `PATH` variable.
 
 ### Arch Linux
 
-A PKGBUILD [is available](https://aur.archlinux.org/packages/ditail) from the AUR.
+A PKGBUILD [is available](https://aur.archlinux.org/packages/python-ditail) from the AUR.
 
 ## License
 The content of this repository is released under the GNU GPL v3.0 or later, as provided in the LICENSE file.
