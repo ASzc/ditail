@@ -10,7 +10,7 @@ license=("GPL")
 depends=("python-pyinotify")
 options=(!emptydirs)
 source=("$url/archive/${pkgver}.tar.gz")
-sha256sums=("TODO")
+sha256sums=("SKIP")
 
 package() {
     cd "$srcdir/$pkgname-$pkgver"
