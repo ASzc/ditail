@@ -11,7 +11,7 @@ ditail operates efficiently in a single thread/process thanks to [asyncio](https
 - `python>=3.4.2` or (`python >= 3.3` and `asyncio>=3.4.2`)
 - `pyinotify>=0.9.5`
 
-[inotify](http://linux.die.net/man/7/inotify) is an API offered only by the Linux kernel, so ditail is limited to Linux-based operating systems.
+[inotify](http://man7.org/linux/man-pages/man7/inotify.7.html) is an API offered only by the Linux kernel, so ditail is limited to Linux-based operating systems.
 
 ### Usage
 
